@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Ts-index-excluder</title>
+	<script>
+		// 定义一个函数，用于对keys生成对应的字符串树
+		function generateTree(keys) {
+			var tree = {};
+			for(key of keys) {
+				var current = tree;
+				for(var i = 0; i < key.length; i++) {
+					var char = key[i];
+					if(current[char] == undefined) {
+						current[char] = {};
+					}
+					current = current[char];
+				}
+			}
+			return tree;
+		}
+		var keymapper = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+		function generateCodebytree(tree, prefix='', typestring='') {
+			var code = "";
+			for(var i = 0; i < keymapper.length; i++) {
+				var char = keymapper[i];
+				if(tree[char] == undefined) {
+					code += "[key: `"+prefix+char+"${string}`]: " + typestring + ";\n";
+				}
+				else {
+					code += generateCodebytree(tree[char], prefix+char, typestring);
+				}
+			}
+			return code;
+		}
+		function generateCode() {
+			keymapper = document.getElementById("chartableinput").value;
+			var keys = document.getElementById("input").value.split(",");
+			var typestring = document.getElementById("typeinput").value;
+			var tree = generateTree(keys);
+			var code = generateCodebytree(tree, '', typestring);
+			document.getElementById("output").value = code;
+		}
+		function Copy() {
+			var copyText = document.getElementById("output");
+			copyText.select();
+			copyText.setSelectionRange(0, copyText.value.length);
+			document.execCommand("copy");
+		}
+	</script>
+</head>
+<body>
+	<h1>Ts-index-excluder</h1>
+	<label for="input">Keys, split by comma:</label>
+	<input type="text" id="input">
+	<br>
+	<label for="typeinput">Type:</label>
+	<input type="text" id="typeinput">
+	<br>
+	<label for="chartableinput">chartable:</label>
+	<input type="text" id="chartableinput" value="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_">
+	<br>
+	<label for="output">Output:</label>
+	<textarea id="output"></textarea>
+	<br>
+	<button onclick="generateCode()">Generate</button>
+	<button onclick="Copy()">Copy</button>
+</body>
+</html>
